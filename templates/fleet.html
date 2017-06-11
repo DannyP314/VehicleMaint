@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+{% for vehicle in vehicles %}
+  <li>
+      {{vehicle.year}} {{vehicle.make}}
+  </li>
+{% endfor %}
+</ul>
+Add a Vehicle:
+<form action="/fleet" method="post">
+    <label>
+        Make:
+        <input type="text" name="new-vehicle-make"/>
+        Model:
+        <input type="text" name="new-vehicle-model"/><br>
+        Year:
+        <input type="text" name="new-vehicle-year"/>
+        Odometer:
+        <input type="text" name="new-vehicle-odometer"/><br />
+        VIN:
+        <input type="text" name="new-vehicle-vin"/>
+        Date of Last Service:
+        <input type="text" name="new-vehicle-service"/><br />
+        <input type="submit" />
+    </label>
+</form>
+
+{% endblock %}

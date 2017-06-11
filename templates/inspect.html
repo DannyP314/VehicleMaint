@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+NEW INSPECTION
+<form action="/inspection" method="post">
+    <label>
+        Make:
+        <input type="text" name="make" value="{{ vehicle.make }}">
+        Model:
+        <input type="text" name="model" value={{vehicle.model}}/><br>
+        Year:
+        <input type="text" name="year" value={{ vehicle.year }}/>
+        Odometer:
+        <input type="text" name="odometer" value={{ vehicle.odometer }}/><br />
+        <input type="submit" />
+    </label>
+
+</form>
+{% endblock %}

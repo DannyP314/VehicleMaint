@@ -1,0 +1,84 @@
+body {
+    font-family: sans-serif;
+    width: 800px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+.error {
+    color: red;
+}
+
+label {
+    display: block;
+    font-size: 20px;
+}
+
+input[type=text],
+input[type=password],
+input[type=email] {
+    width: 400px;
+    font-size: 20px;
+    padding: 2px;
+}
+
+textarea {
+    width: 400px;
+    height: 200px;
+    font-size: 17px;
+    font-family: monospace;
+}
+
+input[type=submit] {
+    font-size: 24px;
+}
+
+hr {
+    margin: 20px auto;
+}
+
+
+
+a:hover{
+    color: #00802b;
+    text-decoration: line-through;
+    background-color: #111;
+}
+a:visited{
+    color: black;
+    text-decoration: line-through;
+}
+a {
+    color: #204060;
+    text-decoration: none;
+}
+li a {
+    display: block;
+    width: 417px;
+    font-size: 25px;
+    font-weight: bold;
+    font-family: 'Jim Nightshade', cursive;
+    padding: 10px 16px;
+    text-decoration: none;
+    text-align: center;
+}
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #666666;
+}
+li {
+    float:left;
+}
+user agent stylesheet
+ul, menu, dir {
+    display: block;
+    list-style-type: disc;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;
+}
