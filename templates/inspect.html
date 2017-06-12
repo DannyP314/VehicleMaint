@@ -5,13 +5,74 @@ NEW INSPECTION
 <form action="/inspection" method="post">
     <label>
         Make:
-        <input type="text" name="make" value="{{ vehicle.make }}">
+        <input type="text" name="make">
         Model:
-        <input type="text" name="model" value={{vehicle.model}}/><br>
+        <input type="text" name="model"/><br>
         Year:
-        <input type="text" name="year" value={{ vehicle.year }}/>
+        <input type="text" name="year">
         Odometer:
-        <input type="text" name="odometer" value={{ vehicle.odometer }}/><br />
+        <input type="text" name="odometer"/><br />
+        Vehicle ID:
+        <input type="text" name="id" value="{{vehicle}}"/>
+        Date:
+        <input type="datetime" name="date" value={{date}} readonly/>
+        <h3><strong>General</strong></h3>
+            <strong>Cab/Doors/Windows/Other</strong>
+            <input type="checkbox" name="general" onclick="dynInput(this);" /><br />
+        <h3><strong>Engine Compartment</strong></h3>
+            <strong>Oil Level</strong>
+            <input type="checkbox" name="oil" onclick="dynInput(this);" /><br />
+            <strong>Coolant Level</strong>
+            <input type="checkbox" name="coolant" onclick="dynInput(this);" /><br />
+            <strong>Belts</strong>
+            <input type="checkbox" name="belts" onclick="dynInput(this);" /><br />
+            <strong>Battery</strong>
+            <input type="checkbox" name="battery" onclick="dynInput(this);" /><br />
+            <strong>Other</strong>
+            <input type="checkbox" name="engine" onclick="dynInput(this);" /><br />
+        <h3><strong>In-Cab</strong></h3>
+            <strong>Gauges/Warning Lights</strong>
+            <input type="checkbox" name="gauges" onclick="dynInput(this);" /><br />
+            <strong>Windshield Wipers</strong>
+            <input type="checkbox" name="wipers" onclick="dynInput(this);" /><br />
+            <strong>Horn</strong>
+            <input type="checkbox" name="horn" onclick="dynInput(this);" /><br />
+            <strong>Heat/AC/Defrost</strong>
+            <input type="checkbox" name="heat" onclick="dynInput(this);" /><br />
+            <strong>Mirrors</strong>
+            <input type="checkbox" name="mirrors" onclick="dynInput(this);" /><br />
+            <strong>Steering</strong>
+            <input type="checkbox" name="steering" onclick="dynInput(this);" /><br />
+            <strong>Brakes</strong>
+            <input type="checkbox" name="brakes" onclick="dynInput(this);" /><br />
+            <strong>Parking Brake</strong>
+            <input type="checkbox" name="ebrake" onclick="dynInput(this);" /><br />
+            <strong>Seat Belts</strong>
+            <input type="checkbox" name="belts" onclick="dynInput(this);" /><br />
+            <strong>Safety Equipment</strong>
+            <input type="checkbox" name="safety" onclick="dynInput(this);" /><br />
+        <h3><strong>Exterior</strong></h3>
+            <strong>Lights</strong>
+            <input type="checkbox" name="lights" onclick="dynInput(this);" /><br />
+            <strong>Reflectors</strong>
+            <input type="checkbox" name="reflectors" onclick="dynInput(this);" /><br />
+            <strong>Suspension</strong>
+            <input type="checkbox" name="suspension" onclick="dynInput(this);" /><br />
+            <strong>Tires</strong>
+            <input type="checkbox" name="tires" onclick="dynInput(this);" /><br />
+            <strong>Wheels/Rims/Lugs</strong>
+            <input type="checkbox" name="wheels" onclick="dynInput(this);" /><br />
+            <strong>Exhaust</strong>
+            <input type="checkbox" name="exhaust" onclick="dynInput(this);" /><br />
+            <strong>Brakes</strong>
+            <input type="checkbox" name="brakes" onclick="dynInput(this);" /><br />
+        <h3 style="display:inline"><strong>Maintenance Action Needed?</strong></h3>
+            <input type="checkbox" name="action" onclick="dynInput(this);" /><br />
+        <p id="insertinputs"> </p>
+        <h3><strong>Please enter your Employee ID here. By doing so you acknowledge
+            that this inspection is accurate and has been filled out by you before
+            operating the vehicle.</strong></h3>
+        <input type="password" name="signature" />
         <input type="submit" />
     </label>
 

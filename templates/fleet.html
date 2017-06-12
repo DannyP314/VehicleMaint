@@ -8,21 +8,26 @@
   </li>
 {% endfor %}
 </ul>
-Add a Vehicle:
+{% if errors %}
+<span class="error">{{errors.unit_error}}{{errors.vin_error}}, {{errors.make_error}}, {{errors.model_error}}, {{errors.year_error}}</span>
+{% endif %}
+<br />Add a Vehicle:
 <form action="/fleet" method="post">
     <label>
         Make:
-        <input type="text" name="new-vehicle-make"/>
+        <input type="text" name="new-vehicle-make" value="{{make}}"/>
         Model:
-        <input type="text" name="new-vehicle-model"/><br>
+        <input type="text" name="new-vehicle-model" value="{{model}}"/><br>
         Year:
-        <input type="text" name="new-vehicle-year"/>
+        <input type="text" name="new-vehicle-year" value="{{year}}"/>
         Odometer:
-        <input type="text" name="new-vehicle-odometer"/><br />
+        <input type="text" name="new-vehicle-odometer" value="{{odometer}}"/><br />
         VIN:
-        <input type="text" name="new-vehicle-vin"/>
+        <input type="text" name="new-vehicle-vin" value="{{vin}}"/>
+        Unit Number:
+        <input type="number" name="new-vehicle-unit" min="1" max="20" />
         Date of Last Service:
-        <input type="text" name="new-vehicle-service"/><br />
+        <input type="date" name="new-vehicle-service" value="{{service}}"/><br />
         <input type="submit" />
     </label>
 </form>

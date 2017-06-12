@@ -1,6 +1,7 @@
 import webapp2, cgi, jinja2, os, re
 from google.appengine.ext import db
 import hashutils
+import datetime
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
@@ -19,6 +20,7 @@ class Vehicle(db.Model):
     odometer = db.IntegerProperty()
     lastservice = db.DateProperty()
     vin = db.StringProperty(required = True)
+    unit = db.IntegerProperty(required = True)
 
 
 class Driver(db.Model):
@@ -33,10 +35,10 @@ class Handler(webapp2.RequestHandler):
         self.error(error_code)
         self.response.write("Oops! Something went wrong.")
 
-    def get_vehicle_by_id(self, id):
-        vehicle_id = db.GqlQuery("SELECT * from Vehicle WHERE ID = '%s'" % id)
-        if vehicle_id:
-            return vehicle_id.get()
+    def get_vehicle_by_unit(self, unit):
+        q = Vehicle.all()
+
+        return q.filter('unit =', unit)
 
     def get_user_by_name(self, username):
         """ Given a username, try to fetch the user from the database """
@@ -88,16 +90,53 @@ class FleetList(Handler):
         new_vehicle_vin = self.request.get("new-vehicle-vin")
         new_vehicle_year = self.request.get("new-vehicle-year")
         new_vehicle_service = self.request.get("new-vehicle-service")
+        new_vehicle_unit = self.request.get("new-vehicle-unit")
 
         #new_vehicle_escaped = cgi.escape(new_vehicle, quote=True)
+        errors = {}
+        existing_unit_num = self.get_vehicle_by_unit(new_vehicle_unit)
+        has_error = False
 
-        vehicle = Vehicle(year = int(new_vehicle_year), make = new_vehicle_make,
-                          model = new_vehicle_model, odometer = int(new_vehicle_odometer),
-                          vin = new_vehicle_vin, service = new_vehicle_service)
-        vehicle.put()
-        t = jinja_env.get_template("fleet.html")
-        content = t.render(vehicle = vehicle)
-        self.write(content)
+        if not new_vehicle_unit:
+            errors['unit_error'] = "Please choose a unit number"
+            has_error = True
+
+        elif not existing_unit_num:
+            errors['unit_error'] = "A vehicle already has that unit number"
+            has_error = True
+
+        elif (new_vehicle_vin and new_vehicle_make and new_vehicle_unit and new_vehicle_year and new_vehicle_model):
+
+            vehicle = Vehicle(year = int(new_vehicle_year), make = new_vehicle_make,
+                              model = new_vehicle_model, odometer = int(new_vehicle_odometer),
+                              vin = new_vehicle_vin, service = new_vehicle_service, unit = int(new_vehicle_unit))
+            vehicle.put()
+
+            # login our new user
+            self.redirect('/fleet')
+        else:
+            has_error = True
+
+            if not new_vehicle_vin:
+                errors['vin_error'] = "Please enter VIN"
+
+            if not new_vehicle_make:
+                errors['make_error'] = "Please enter a vehicle make"
+
+            if not new_vehicle_year:
+                errors['year_error'] = "Please enter a year"
+
+            if not new_vehicle_model:
+                errors['model_error'] = "Please enter a model"
+
+        if has_error:
+            t = jinja_env.get_template("fleet.html")
+            response = t.render(vin=new_vehicle_vin, model=new_vehicle_model, make=new_vehicle_make, unit=new_vehicle_unit, year=new_vehicle_year, service=new_vehicle_service, odometer=new_vehicle_odometer, errors=errors)
+            self.response.out.write(response)
+        else:
+            t = jinja_env.get_template("fleet.html")
+            content = t.render(vehicle = vehicle)
+            self.redirect('/fleet')
 
 class Maintenance(Handler):
     def get(self):
@@ -117,11 +156,18 @@ class Inspection(Handler):
 
 class InspectionForm(Handler):
     def get(self):
-        inspect = self.request.get("vehicle")
-        vehicle = self.get_vehicle_by_id(inspect)
+        vehicle = self.request.get("vehicle")
         t = jinja_env.get_template("inspect.html")
-        response = t.render(vehicle = vehicle)
+        response = t.render(vehicle = vehicle, date = datetime.datetime.now())
         self.write(response)
+
+#class Test(Handler):
+#    def get(self):
+#        inspect = self.request.get("vehicle")
+#        vehicle = self.get_vehicle_by_id(inspect)
+#        t =jinja_env.get_template("test.html")
+#        response = t.render(vehicle = vehicle.make)
+#        self.write(response)
 
 class MaintNeeded(Handler):
     def get(self):
@@ -274,5 +320,6 @@ app = webapp2.WSGIApplication([
     ('/drivers', Drivers),
     ('/records', MaintRecords),
     ('/login', Login),
-    ('/logout', LogOut)
+    ('/logout', LogOut),
+    #('/test', Test)
 ], debug=True)

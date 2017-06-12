@@ -3,7 +3,7 @@
 {% block content %}
 {% for vehicle in vehicles %}
 <form action="/inspection" method="get" id="form1">
-      <input type="radio" name="vehicle" value={{ vehicle.key().id() }}>{{vehicle.year}} {{vehicle.make}}</input>
+      <input type="radio" name="vehicle" value={{ vehicle.unit }}>{{vehicle.year}} {{vehicle.make}}</input>
 </form>
 {% endfor %}
 <button type="submit" form="form1" value="Submit">Submit</button>
