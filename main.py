@@ -2,6 +2,7 @@ import webapp2, cgi, jinja2, os, re
 from google.appengine.ext import db
 import hashutils
 import datetime
+from datetime import datetime
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
@@ -21,12 +22,19 @@ class Vehicle(db.Model):
     lastservice = db.DateProperty()
     vin = db.StringProperty(required = True)
     unit = db.IntegerProperty(required = True)
+    maintreq = db.BooleanProperty(required = True)
 
 
 class Driver(db.Model):
     name = db.StringProperty(required = True)
     employeeid = db.IntegerProperty(required = True)
-    startdate = db.DateProperty()
+
+class MaintRecord(db.Model):
+    typeofmaint = db.StringProperty(required = True)
+    date = db.DateProperty(required = True)
+    description = db.TextProperty()
+    vehicle = db.ReferenceProperty(Vehicle, required = True)
+
 
 
 class Handler(webapp2.RequestHandler):
@@ -34,6 +42,11 @@ class Handler(webapp2.RequestHandler):
         """ Sends an HTTP error code and a generic "oops!" message to the client. """
         self.error(error_code)
         self.response.write("Oops! Something went wrong.")
+
+    def get_maint_needed_vehicles(self):
+        vehicle = db.GqlQuery("SELECT * from Vehicle WHERE maintreq = True")
+        if vehicle:
+            return vehicle.get()
 
     def get_vehicle_by_unit(self, unit):
         q = Vehicle.all()
@@ -69,6 +82,15 @@ class Handler(webapp2.RequestHandler):
         query = Vehicle.all()
         vehicles = query.run()
         return vehicles
+
+    def get_drivers(self):
+        query= Driver.all()
+        drivers = query.run()
+        return drivers
+
+    def get_driver_by_name(self, name):
+        query= Driver.all()
+        return query.filter('name =', name)
 
 
 class Index(Handler):
@@ -109,7 +131,8 @@ class FleetList(Handler):
 
             vehicle = Vehicle(year = int(new_vehicle_year), make = new_vehicle_make,
                               model = new_vehicle_model, odometer = int(new_vehicle_odometer),
-                              vin = new_vehicle_vin, service = new_vehicle_service, unit = int(new_vehicle_unit))
+                              vin = new_vehicle_vin, service = new_vehicle_service, unit = int(new_vehicle_unit),
+                              maintreq = False)
             vehicle.put()
 
             # login our new user
@@ -140,15 +163,28 @@ class FleetList(Handler):
 
 class Maintenance(Handler):
     def get(self):
-        t = jinja_env.get_template("maint.html")
-        response = t.render()
+        vehicles =self.get_maint_needed_vehicles()
+        if vehicles:
+            t = jinja_env.get_template("maint.html")
+            content = t.render(vehicles = vehicles)
+        else:
+            t = jinja_env.get_template("maint.html")
+            content = t.render(vehicles = None)
+
+        self.write(content)
+
+class MaintNeeded(Handler):
+    def get(self):
+        maintvehicle = self.request.get("vehicle")
+        t = jinja_env.get_template("maintneeded.html")
+        response = t.render(vehicle = Vehicle.get_by_id(int(maintvehicle)))
         self.write(response)
 
 class Inspection(Handler):
     def get(self):
         toInspect = self.request.get("vehicle")
         if toInspect:
-            self.redirect('/inspect')
+            self.redirect('/inspect?vehicle=%s' % toInspect)
         else:
             t = jinja_env.get_template("inspectfront.html")
             response = t.render(vehicles = self.get_vehicles())
@@ -158,8 +194,9 @@ class InspectionForm(Handler):
     def get(self):
         vehicle = self.request.get("vehicle")
         t = jinja_env.get_template("inspect.html")
-        response = t.render(vehicle = vehicle, date = datetime.datetime.now())
+        response = t.render(vehicle = Vehicle.get_by_id(int(vehicle)), date = datetime.now())
         self.write(response)
+
 
 #class Test(Handler):
 #    def get(self):
@@ -169,17 +206,45 @@ class InspectionForm(Handler):
 #        response = t.render(vehicle = vehicle.make)
 #        self.write(response)
 
-class MaintNeeded(Handler):
-    def get(self):
-        t = jinja_env.get_template("maintneeded.html")
-        response = t.render()
-        self.write(response)
-
 class Drivers(Handler):
     def get(self):
         t = jinja_env.get_template("drivers.html")
-        response = t.render()
+        response = t.render(drivers = self.get_drivers())
         self.write(response)
+
+    def post(self):
+        new_name = self.request.get("name")
+        new_employeeid = self.request.get("employeeid")
+
+        errors = {}
+        existing_driver = self.get_driver_by_name(new_name)
+        has_error = False
+
+        if not new_name:
+            errors['name_error'] = "Please enter a name."
+            has_error = True
+
+        elif (new_employeeid):
+
+            driver = Driver(name=new_name, employeeid = int(new_employeeid))
+            driver.put()
+
+            self.redirect('/drivers')
+        else:
+            has_error = True
+
+            if not new_employeeid:
+                errors['employeeid_error'] = "Please enter an Employee ID"
+
+
+        if has_error:
+            t = jinja_env.get_template("drivers.html")
+            response = t.render(name=new_name, employeeid=new_employeeid, errors=errors)
+            self.response.out.write(response)
+        else:
+            t = jinja_env.get_template("drivers.html")
+            content = t.render(driver = driver)
+            self.redirect('/drivers')
 
 class MaintRecords(Handler):
     def get(self):

@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
 
 {% block content %}
+{% if vehicles != None %}
+<ul>
+{% for vehicle in vehicles %}
+  <li>
+      <a href="/maintneeded?vehicle={{vehicle.unit}}">{{vehicle.year}} {{vehicle.make}} </a>
+  </li>
+{% endfor %}
+</ul>
+{% else %}
+<h2>No vehicles currently require maintenance.</h2>
+Click here to add a maintenance request!
+{% endif %}
 
 {% endblock %}

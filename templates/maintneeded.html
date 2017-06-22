@@ -1,5 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<h2>Add new Maintenance Record for {{vehicle.unit}}</h2>
+<form action="/maintneeded" method="post">
+    <label>
+        Make:
+        <input type="text" name="make" value="{{vehicle.make}}"/>
+        Model:
+        <input type="text" name="model" value="{{vehicle.model}}"/><br>
+        Year:
+        <input type="text" name="year" value="{{vehicle.year}}"/>
+        Unit Number:
+        <input type="number" name="unit" value="{{vehicle.unit}}"/>
+        Date of Service:
+        <input type="date" name="service-date"/><br />
+        Description of Service:
+        <textarea name="description"></textarea>
+        <input type="submit" />
+    </label>
+</form>
 
 {% endblock %}

@@ -2,4 +2,19 @@
 
 {% block content %}
 
+{% for driver in drivers %}
+<h2>{{ driver.name}}</h2>
+<ul>
+    Employee ID: {{driver.employeeid}}
+</ul>
+{% endfor %}
+
+<h1>Add New Driver</h1>
+<form action="/drivers" method="post">
+    <label>Driver Name:</label>
+    <input type="text" name="name" /><br />
+    <label>Employee ID:</label>
+    <input type="text" name="employeeid" /><br />
+    <input type="submit" />
+</form>
 {% endblock %}

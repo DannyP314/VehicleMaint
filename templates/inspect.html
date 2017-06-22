@@ -5,15 +5,15 @@ NEW INSPECTION
 <form action="/inspection" method="post">
     <label>
         Make:
-        <input type="text" name="make">
+        <input type="text" name="make" value="{{vehicle.make}}" readonly>
         Model:
-        <input type="text" name="model"/><br>
+        <input type="text" name="model" value="{{vehicle.model}}" readonly/><br>
         Year:
-        <input type="text" name="year">
+        <input type="text" name="year" value="{{vehicle.year}}" readonly>
         Odometer:
-        <input type="text" name="odometer"/><br />
+        <input type="text" name="odometer" value="{{vehicle.odometer}}" readonly/><br />
         Vehicle ID:
-        <input type="text" name="id" value="{{vehicle}}"/>
+        <input type="text" name="id" value="{{vehicle.unit}}" readonly/>
         Date:
         <input type="datetime" name="date" value={{date}} readonly/>
         <h3><strong>General</strong></h3>
