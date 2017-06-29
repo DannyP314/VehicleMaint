@@ -3,6 +3,10 @@
 <html>
     <head>
         <title>Vehicle Maintenance</title>
+        <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css"
+              asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="/css/normalize.css">
         <link rel="stylesheet" href="/css/styles.css">
         <script type="text/javascript">
@@ -22,19 +26,34 @@
         </script>
     </head>
     <body>
-        <ul>
-          <a href="/">Home</a>
-          <a href="/fleet">Fleet List</a>
-          <a href="/maintenance">Maintenance</a>
-          <a href="/inspection">New Inspection</a>
-          <a href="/maintneeded">Maintenance Needed</a>
-          <a href="/drivers">Driver List</a>
-          <a href="/records">Maintenance Records</a>
-          <a href="/login">Login</a>
-          <a href="/logout">Log Out</a>
-        </ul>
-
+        <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="/" class="navbar-brand">Regency Vehicle Maintenance</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/fleet">Fleet List</a></li>
+                    <li><a href="/maintenance">Maintenance</a></li>
+                    <li><a href="/inspection">New Inspection</a></li>
+                    <li><a href="/drivers">Driver List</a></li>
+                    <li><a href="/records">Maintenance Records</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+        <div class="container body-content">
+            <hr />
+            <hr />
         {% block content %}
         {% endblock %}
+        </div>
+
     </body>
 </html>
