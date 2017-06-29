@@ -3,43 +3,13 @@ from google.appengine.ext import db
 import hashutils
 import datetime
 from datetime import datetime
+from models import User, Vehicle, Driver, MaintRecord
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 
-class User(db.Model):
-    """ Represents a user on our site """
-    username = db.StringProperty(required = True)
-    password = db.StringProperty(required = True)
-
-
-class Vehicle(db.Model):
-    """ Represents a movie that a user wants to watch or has watched """
-    year = db.IntegerProperty(required = True)
-    make = db.StringProperty(required = True)
-    model = db.StringProperty(required = True)
-    odometer = db.IntegerProperty()
-    lastservice = db.DateProperty()
-    vin = db.StringProperty(required = True)
-    unit = db.IntegerProperty(required = True)
-    maintreq = db.BooleanProperty(required = True)
-
-
-class Driver(db.Model):
-    name = db.StringProperty(required = True)
-    employeeid = db.IntegerProperty(required = True)
-
-class MaintRecord(db.Model):
-    typeofmaint = db.StringProperty(required = True)
-    date = db.DateProperty(required = True)
-    description = db.TextProperty()
-    vehicle = db.ReferenceProperty(Vehicle, required = True)
-
-
-
 class Handler(webapp2.RequestHandler):
     def renderError(self, error_code):
-        """ Sends an HTTP error code and a generic "oops!" message to the client. """
         self.error(error_code)
         self.response.write("Oops! Something went wrong.")
 
@@ -54,7 +24,6 @@ class Handler(webapp2.RequestHandler):
         return q.filter('unit =', unit)
 
     def get_user_by_name(self, username):
-        """ Given a username, try to fetch the user from the database """
         user = db.GqlQuery("SELECT * from User WHERE username = '%s'" % username)
         if user:
             return user.get()
