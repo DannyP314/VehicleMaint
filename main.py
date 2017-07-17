@@ -158,13 +158,70 @@ class Inspection(Handler):
             t = jinja_env.get_template("inspectfront.html")
             response = t.render(vehicles = self.get_vehicles())
             self.write(response)
+    def post(self):
+        general_checkbox = self.request.get("general")
+        oil_checkbox = self.request.get("oil")
+        coolant_checkbox = self.request.get("coolant")
+        belts_checkbox = self.request.get("belts")
+        battery_checkbox = self.request.get("battery")
+        engine_checkbox = self.request.get("engine")
+        gauges_checkbox = self.request.get("gauges")
+        wipers_checkbox = self.request.get("wipers")
+        horn_checkbox = self.request.get("horn")
+        heat_checkbox = self.request.get("heat")
+        mirrors_checkbox = self.request.get("mirrors")
+        steering_checkbox = self.request.get("steering")
+        brakes_checkbox = self.request.get("brakes")
+        ebrake_checkbox = self.request.get("ebrake")
+        seatbelts_checkbox = self.request.get("seatbelts")
+        safety_checkbox = self.request.get("safety")
+        lights_checkbox = self.request.get("lights")
+        reflectors_checkbox = self.request.get("reflectors")
+        suspension_checkbox = self.request.get("suspension")
+        tires_checkbox = self.request.get("tires")
+        exhaust_checkbox = self.request.get("exhaust")
+        wheels_checkbox = self.request.get("wheels")
+        exbrakes_checkbox = self.request.get("exbrakes")
+        action_checkbox = self.request.get("action")
 
+        form = InspectionForm(
+            general = general_checkbox,
+            oil = oil_checkbox,
+            coolant = coolant_checkbox,
+            belts = belts_checkbox,
+            battery = battery_checkbox,
+            engine = engine_checkbox,
+            gauges = gauges_checkbox,
+            wipers = wipers_checkbox,
+            horn = horn_checkbox,
+            heat = heat_checkbox,
+            mirrors = mirrors_checkbox,
+            steering = steering_checkbox,
+            brakes = brakes_checkbox,
+            ebrake = ebrake_checkbox,
+            seatbelts = seatbelts_checkbox,
+            safety = safety_checkbox,
+            lights = lights_checkbox,
+            reflectors = reflectors_checkbox,
+            suspension = suspension_checkbox,
+            tires = tires_checkbox,
+            wheels = wheels_checkbox,
+            exhaust = exhaust_checkbox,
+            exbrakes = exbrakes_checkbox,
+            actionneeded = action_checkbox
+            )
+        form.put()
+
+        t = jinja_env.get_template("test.html")
+        response = t.render(form=form)
+        self.write(response)
 class InspectionForm(Handler):
     def get(self):
         vehicle = self.request.get("vehicle")
         t = jinja_env.get_template("inspect.html")
         response = t.render(vehicle = Vehicle.get_by_id(int(vehicle)), date = datetime.now())
         self.write(response)
+
 
 
 #class Test(Handler):
