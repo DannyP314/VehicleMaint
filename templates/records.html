@@ -1,5 +1,21 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+<a href="/newmaint">Add a new maintenance record.</a>
+    <table class="table">
+    <tr>
+        <th>Vehicle</th>
+        <th>Date</th>
+        <th>Type of Maintenance</th>
+        <th>Description</th>
+    </tr>
+    {% for record in records %}
+    <tr>
+        <td>{{ record.vehicle.unit }}</td>
+        <td>{{ record.date }}</td>
+        <td>{{ record.typeofmaint }}</td>
+        <td>{{ record.description }}</td>
+    </tr>
+        {% endfor %}
+    </table>
 {% endblock %}

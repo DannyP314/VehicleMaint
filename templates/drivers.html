@@ -2,14 +2,12 @@
 
 {% block content %}
 
-
-
 <h1>Add New Driver</h1>
 <form action="/drivers" method="post">
     <label>Driver Name:</label>
-    <input type="text" name="name" /><br />
+    <input type="text" name="name" value="{{new_name}}"/>{% if errors %}{{errors.name_error}}{% endif %}<br />
     <label>Employee ID:</label>
-    <input type="text" name="employeeid" /><br />
+    <input type="text" name="employeeid" value="{{new_employeeid}}"/>{% if errors %}{{errors.employeeid_error}}{% endif %}<br />
     <input type="submit" />
 </form><br />
 

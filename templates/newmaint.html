@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="/newmaint" method="post">
+    {% for vehicle in vehicles %}
+    <input type="radio" name="vehicle" value={{vehicle.key().id()}}>{{vehicle.year}} {{vehicle.make}}({{vehicle.unit}})</input><br />
+    {% endfor %}
+    <label>Type of Maintenane:</label>
+    <select name="type">
+        <option value="pm">Preventative Maintenance</option>
+        <option value="rm">Reactive Maintenance</option>
+        <option value="other">Other</option>
+    </select></br>
+    <label>Description:</label>
+    <input type="text" name="description" />
+    <button type="submit">Add Record</button>
+</form>
+{% endblock %}

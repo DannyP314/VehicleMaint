@@ -3,7 +3,8 @@ from google.appengine.ext import db
 import hashutils
 import datetime
 from datetime import datetime
-from models import User, Vehicle, Driver, MaintRecord
+import random
+from models import User, Vehicle, Driver, MaintRecord, InspectForm
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
@@ -23,10 +24,21 @@ class Handler(webapp2.RequestHandler):
 
         return q.filter('unit =', unit)
 
+    def get_records_by_vehicle(self, vehicle):
+        q= MaintRecord.all()
+
+        return q.filter('vehicle =', vehicle)
+
     def get_user_by_name(self, username):
         user = db.GqlQuery("SELECT * from User WHERE username = '%s'" % username)
         if user:
             return user.get()
+
+    def get_records(self):
+        q = MaintRecord.all()
+        records = q.run()
+
+        return records
 
     def read_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
@@ -60,6 +72,15 @@ class Handler(webapp2.RequestHandler):
     def get_driver_by_name(self, name):
         query= Driver.all()
         return query.filter('name =', name)
+
+    def get_driver_by_num(self, employeeid):
+        query=Driver.all()
+        return query.filter('employeeid =', employeeid)
+
+    def get_inspections(self):
+        query= InspectForm.all()
+        forms = query.run()
+        return forms
 
 
 class Index(Handler):
@@ -104,7 +125,6 @@ class FleetList(Handler):
                               maintreq = False)
             vehicle.put()
 
-            # login our new user
             self.redirect('/fleet')
         else:
             has_error = True
@@ -127,7 +147,7 @@ class FleetList(Handler):
             self.response.out.write(response)
         else:
             t = jinja_env.get_template("fleet.html")
-            content = t.render(vehicle = vehicle)
+            content = t.render(vehicles = self.get_vehicles())
             self.redirect('/fleet')
 
 class Maintenance(Handler):
@@ -149,14 +169,15 @@ class MaintNeeded(Handler):
         response = t.render(vehicle = Vehicle.get_by_id(int(maintvehicle)))
         self.write(response)
 
-class Inspection(Handler):
+class Inspection(Handler): #/inspection pass driver through url
     def get(self):
         toInspect = self.request.get("vehicle")
+        driver = self.request.get("driver")
         if toInspect:
-            self.redirect('/inspect?vehicle=%s' % toInspect)
+            self.redirect('/inspect?vehicle={0}&?driver={1}'.format(toInspect,driver))
         else:
             t = jinja_env.get_template("inspectfront.html")
-            response = t.render(vehicles = self.get_vehicles())
+            response = t.render(vehicles = self.get_vehicles(), drivers = self.get_drivers())
             self.write(response)
     def post(self):
         general_checkbox = self.request.get("general")
@@ -183,45 +204,77 @@ class Inspection(Handler):
         wheels_checkbox = self.request.get("wheels")
         exbrakes_checkbox = self.request.get("exbrakes")
         action_checkbox = self.request.get("action")
+        form_num = self.request.get("formnum")
+        current_vehicle = self.request.get("vehicle")
+        current_driver = self.request.get("driver")
 
-        form = InspectionForm(
-            general = general_checkbox,
-            oil = oil_checkbox,
-            coolant = coolant_checkbox,
-            belts = belts_checkbox,
-            battery = battery_checkbox,
-            engine = engine_checkbox,
-            gauges = gauges_checkbox,
-            wipers = wipers_checkbox,
-            horn = horn_checkbox,
-            heat = heat_checkbox,
-            mirrors = mirrors_checkbox,
-            steering = steering_checkbox,
-            brakes = brakes_checkbox,
-            ebrake = ebrake_checkbox,
-            seatbelts = seatbelts_checkbox,
-            safety = safety_checkbox,
-            lights = lights_checkbox,
-            reflectors = reflectors_checkbox,
-            suspension = suspension_checkbox,
-            tires = tires_checkbox,
-            wheels = wheels_checkbox,
-            exhaust = exhaust_checkbox,
-            exbrakes = exbrakes_checkbox,
-            actionneeded = action_checkbox
-            )
-        form.put()
+        checkboxes = [general_checkbox, oil_checkbox, coolant_checkbox, belts_checkbox,
+                    battery_checkbox, engine_checkbox, gauges_checkbox, wipers_checkbox,
+                    horn_checkbox, heat_checkbox, mirrors_checkbox, steering_checkbox,
+                    brakes_checkbox, ebrake_checkbox, seatbelts_checkbox, safety_checkbox,
+                    lights_checkbox, reflectors_checkbox, suspension_checkbox, tires_checkbox,
+                    exhaust_checkbox, wheels_checkbox, exbrakes_checkbox]
+        action_items = []
+        vehicle = Vehicle.get_by_id(int(current_vehicle))
+        driver = Driver.get_by_id(int(current_driver))
+        for i in checkboxes:
+            if i != "":
+                action_items.append(i)
+        #if action_items != []:
+            #vehicle.maintreq = True
+            #vehicle.put()
+        #else:
+            #form = Inspection(formnum = form_num, items = "No maintenance required",
+                               #vehicle = vehicle)
+            #form.put()
+
+
+
+        t = jinja_env.get_template("inspectdetails.html")
+        response = t.render(action_items = action_items, form_num = form_num,
+                            vehicle = vehicle, driver=driver)
+        self.write(response)
+
+class InspectionForm(Handler): #/inspect
+    def get(self):
+        current_vehicle = self.request.get("vehicle")
+        current_driver = self.request.get("driver")
+        vehicle = Vehicle.get_by_id(int(current_vehicle))
+        driver = Driver.get_by_id(int(current_driver))
+        drivetype = type(current_driver)
+
+        month = str(datetime.today().month)
+        year = str(datetime.today().year)
+        rand_num = str(random.randint(100,999))
+        today = rand_num + month + year
+
+        t = jinja_env.get_template("inspectdetails.html")
+        response = t.render(type=drivetype, driver = driver, vehicle = vehicle, date = datetime.now(), formid = today)
+        self.write(response)
+
+    def post(self):
+        formnum = self.request.get("form")
+        details = self.request.get("details")
+        items = self.request.POST.getall("items")
+        current_vehicle = self.request.get("vehicle")
+        vehicle = Vehicle.get_by_id(int(current_vehicle))
+        current_driver = self.request.get("driver")
+        #driver = Driver.get_by_id(int(current_driver))
+
+        item = []
+        for x in items:
+            x = str(x)
+            item.append(x)
+
+        drivertype=type(current_driver)
+
+        #form = InspectForm(formnum=str(formnum),items=item,details=str(details),vehicle=vehicle, driver=driver)
+        #form.put()
 
         t = jinja_env.get_template("test.html")
-        response = t.render(form=form)
+        #response = t.render(forms=self.get_inspections())
+        response = t.render(driver=current_driver,type=drivertype)
         self.write(response)
-class InspectionForm(Handler):
-    def get(self):
-        vehicle = self.request.get("vehicle")
-        t = jinja_env.get_template("inspect.html")
-        response = t.render(vehicle = Vehicle.get_by_id(int(vehicle)), date = datetime.now())
-        self.write(response)
-
 
 
 #class Test(Handler):
@@ -265,18 +318,40 @@ class Drivers(Handler):
 
         if has_error:
             t = jinja_env.get_template("drivers.html")
-            response = t.render(name=new_name, employeeid=new_employeeid, errors=errors)
+            response = t.render(name=new_name, employeeid=new_employeeid, errors=errors, drivers=self.get_drivers())
             self.response.out.write(response)
         else:
             t = jinja_env.get_template("drivers.html")
-            content = t.render(driver = driver)
+            content = t.render(drivers = self.get_drivers())
             self.redirect('/drivers')
 
 class MaintRecords(Handler):
     def get(self):
+        vehicles = self.get_vehicles()
+        records = self.get_records()
+
         t = jinja_env.get_template("records.html")
-        response = t.render()
+        response = t.render(records=records)
         self.write(response)
+
+class NewMaint(Handler):
+    def get(self):
+        vehicles = self.get_vehicles()
+
+        t=jinja_env.get_template("newmaint.html")
+        response= t.render(vehicles=vehicles)
+        self.write(response)
+
+    def post(self):
+        current_vehicle = self.request.get("vehicle")
+        chosen_type = self.request.get("type")
+        description = self.request.get("description")
+        chosen_vehicle = Vehicle.get_by_id(int(current_vehicle))
+
+        maint = MaintRecord(typeofmaint = chosen_type, description=description, vehicle=chosen_vehicle)
+        maint.put()
+
+        self.redirect('/records')
 
 class SignupHandler(Handler):
 
@@ -410,6 +485,7 @@ app = webapp2.WSGIApplication([
     ('/maintneeded', MaintNeeded),
     ('/drivers', Drivers),
     ('/records', MaintRecords),
+    ('/newmaint', NewMaint),
     ('/login', Login),
     ('/logout', LogOut),
     #('/test', Test)

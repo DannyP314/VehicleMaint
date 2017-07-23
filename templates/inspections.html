@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<table class="table">
+    <tr>
+        <th>Vehicle</th>
+        <th>Form ID</th>
+        <th>Date</th>
+        <th>Driver</th>
+    </tr>
+    {% for form in forms %}
+    <tr>
+        <td>{{ form.vehicle.unit }}</td>
+        <td>{{form.formnum}}</td>
+        <td>{{form.date}}</td>
+        <td></td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

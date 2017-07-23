@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+Form ID: <input type="text" value="{{form_num}}" readonly />
+Driver: <input type="text" value="{{driver.name}}" readonly />
+<h3>Please provide details for these action items:</h3>
+{% for item in action_items %}
+        {{item}},
+{% endfor %}
+<form action="/inspect" method="post">
+    {% for item in action_items %}
+    <input type="hidden" name="items" value="{{item}}" />
+    {% endfor %}
+    <input type="hidden" name="vehicle" value="{{vehicle.key().id()}}" />
+    <input type="hidden" name="form" value="{{form_num}}" />
+    <input type="hidden" name="driver" value="{{driver.key().id()}}"
+    <input type="text" name="details" />
+    <input type="submit" />
+</form>
+
+{% endblock %}

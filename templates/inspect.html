@@ -1,8 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-NEW INSPECTION
+NEW INSPECTION Form ID:
+<input type="text" name="formnum" value="{{vehicle.unit}}{{formid}}" readonly />
 <form action="/inspection" method="post">
+    <input type="hidden" name="vehicle" value="{{vehicle.key().id()}}" />
+    <input type="hidden" name="formnum" value="{{vehicle.unit}}{{formid}}" />
     <label>
         Make:
         <input type="text" name="make" value="{{vehicle.make}}" readonly>
@@ -18,61 +21,61 @@ NEW INSPECTION
         <input type="datetime" name="date" value={{date}} readonly/>
         <h3><strong>General</strong></h3>
             <strong>Cab/Doors/Windows/Other</strong>
-            <input type="checkbox" name="general" /><br />
+            <input type="checkbox" name="general" value="General"/><br />
         <h3><strong>Engine Compartment</strong></h3>
             <strong>Oil Level</strong>
-            <input type="checkbox" name="oil"  /><br />
+            <input type="checkbox" name="oil"  value="Oil"/><br />
             <strong>Coolant Level</strong>
-            <input type="checkbox" name="coolant"  /><br />
+            <input type="checkbox" name="coolant"  value="Coolant"/><br />
             <strong>Belts</strong>
-            <input type="checkbox" name="belts"  /><br />
+            <input type="checkbox" name="belts"  value="Belts"/><br />
             <strong>Battery</strong>
-            <input type="checkbox" name="battery"  /><br />
+            <input type="checkbox" name="battery"  value="Battery"/><br />
             <strong>Other</strong>
-            <input type="checkbox" name="engine"  /><br />
+            <input type="checkbox" name="engine"  value="Engine Compartment Other"/><br />
         <h3><strong>In-Cab</strong></h3>
             <strong>Gauges/Warning Lights</strong>
-            <input type="checkbox" name="gauges"  /><br />
+            <input type="checkbox" name="gauges"  value="Gauges/Warning Lights"/><br />
             <strong>Windshield Wipers</strong>
-            <input type="checkbox" name="wipers"  /><br />
+            <input type="checkbox" name="wipers" value="Windshield Wipers" /><br />
             <strong>Horn</strong>
-            <input type="checkbox" name="horn"  /><br />
+            <input type="checkbox" name="horn"  value="Horn"/><br />
             <strong>Heat/AC/Defrost</strong>
-            <input type="checkbox" name="heat"  /><br />
+            <input type="checkbox" name="heat"  value="Heat/AC/Defrost"/><br />
             <strong>Mirrors</strong>
-            <input type="checkbox" name="mirrors"  /><br />
+            <input type="checkbox" name="mirrors"  value="Mirrors"/><br />
             <strong>Steering</strong>
-            <input type="checkbox" name="steering"  /><br />
+            <input type="checkbox" name="steering"  value="Steering"/><br />
             <strong>Brakes</strong>
-            <input type="checkbox" name="brakes"  /><br />
+            <input type="checkbox" name="brakes"  value="Interior Brakes"/><br />
             <strong>Parking Brake</strong>
-            <input type="checkbox" name="ebrake"  /><br />
+            <input type="checkbox" name="ebrake"  value="Parking Brake"/><br />
             <strong>Seat Belts</strong>
-            <input type="checkbox" name="seatbelts"  /><br />
+            <input type="checkbox" name="seatbelts"  value="Seatbelts"/><br />
             <strong>Safety Equipment</strong>
-            <input type="checkbox" name="safety"  /><br />
+            <input type="checkbox" name="safety"  value="Safety Equipment"/><br />
         <h3><strong>Exterior</strong></h3>
             <strong>Lights</strong>
-            <input type="checkbox" name="lights"  /><br />
+            <input type="checkbox" name="lights"  value="Lights"/><br />
             <strong>Reflectors</strong>
-            <input type="checkbox" name="reflectors"  /><br />
+            <input type="checkbox" name="reflectors"  value="Reflectors"/><br />
             <strong>Suspension</strong>
-            <input type="checkbox" name="suspension"  /><br />
+            <input type="checkbox" name="suspension"  value="Suspension"/><br />
             <strong>Tires</strong>
-            <input type="checkbox" name="tires"  /><br />
+            <input type="checkbox" name="tires"  value="Tires"/><br />
             <strong>Wheels/Rims/Lugs</strong>
-            <input type="checkbox" name="wheels"  /><br />
+            <input type="checkbox" name="wheels"  value="Wheels"/><br />
             <strong>Exhaust</strong>
-            <input type="checkbox" name="exhaust"  /><br />
+            <input type="checkbox" name="exhaust"  value="Exhaust"/><br />
             <strong>Brakes</strong>
-            <input type="checkbox" name="exbrakes"  /><br />
-        <h3 style="display:inline"><strong>Maintenance Action Needed?</strong></h3>
-            <input type="checkbox" name="action"  /><br />
+            <input type="checkbox" name="exbrakes"  value="Exterior Brakes"/><br />
+
 
         <h3><strong>Please enter your Employee ID here. By doing so you acknowledge
             that this inspection is accurate and has been filled out by you before
             operating the vehicle.</strong></h3>
-        <input type="password" name="signature" />
+        <input type="hidden" name="driver" value="{{driver.key().id()}}" />
+        <input type="number" name="signature" />
         <input type="submit" />
     </label>
 
