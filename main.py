@@ -150,6 +150,18 @@ class FleetList(Handler):
             content = t.render(vehicles = self.get_vehicles())
             self.redirect('/fleet')
 
+class ViewVehicle(Handler):
+    def get(self, id):
+
+        vehicle = Vehicle.get_by_id(int(id))
+        if vehicle:
+            t = jinja_env.get_template("vehicle.html")
+            response = t.render(vehicle=vehicle)
+        else:
+            error = "there is no post with id %s" % id
+            t = jinja_env.get_template("404.html")
+            response = t.render(error=error)
+
 class Maintenance(Handler):
     def get(self):
         vehicles =self.get_maint_needed_vehicles()
@@ -486,6 +498,7 @@ app = webapp2.WSGIApplication([
     ('/drivers', Drivers),
     ('/records', MaintRecords),
     ('/newmaint', NewMaint),
+    webapp2.Route('/vehicle/<id:\d+>', ViewVehicle),
     ('/login', Login),
     ('/logout', LogOut),
     #('/test', Test)

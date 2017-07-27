@@ -3,9 +3,7 @@
 {% block content %}
 <ul>
 {% for vehicle in vehicles %}
-  <li>
-      {{vehicle.year}} {{vehicle.make}}
-  </li>
+  <li>({{vehicle.unit}}){{vehicle.year}} {{vehicle.make}}</li>
 {% endfor %}
 </ul>
 {% if errors %}
