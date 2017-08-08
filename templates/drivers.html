@@ -15,11 +15,25 @@
     <tr>
         <th>Name</th>
         <th>Employee ID</th>
+        <th>Edit</th>
+        <th>Delete</th>
     </tr>
     {% for driver in drivers %}
     <tr>
         <td>{{ driver.name }}</td>
         <td>{{driver.employeeid}}</td>
+        <td>
+          <form action="/driveredit" method="get">
+            <input type="hidden" name="edit" value="{{driver.key().id()}}" />
+              <input type="submit" value="Edit Driver" />
+          </form>
+        </td>
+        <td>
+          <form action="/driverdelete" method="post">
+            <input type="hidden" name="delete" value="{{driver.key().id()}}" />
+            <input type="submit" value="Delete Driver" />
+          </form>
+      </td>
     </tr>
     {% endfor %}
 </table>

@@ -17,7 +17,7 @@ class Handler(webapp2.RequestHandler):
     def get_maint_needed_vehicles(self):
         vehicle = db.GqlQuery("SELECT * from Vehicle WHERE maintreq = True")
         if vehicle:
-            return vehicle.get()
+            return vehicle
 
     def get_vehicle_by_unit(self, unit):
         q = Vehicle.all()
@@ -150,6 +150,48 @@ class FleetList(Handler):
             content = t.render(vehicles = self.get_vehicles())
             self.redirect('/fleet')
 
+class EditVehicle(Handler):
+    def get(self):
+        vehicle = int(self.request.get("edit"))
+        edit_vehicle = Vehicle.get_by_id(vehicle)
+
+        t = jinja_env.get_template("vehicleedit.html")
+        content = t.render(vehicle=edit_vehicle)
+        self.write(content)
+
+    def post(self):
+        vehicle = int(self.request.get("vehicle"))
+        edit_vehicle = Vehicle.get_by_id(vehicle)
+        make = self.request.get("make")
+        model = self.request.get("model")
+        year = int(self.request.get("year"))
+        odometer = int(self.request.get("odometer"))
+        vin = self.request.get("vin")
+
+        edit_vehicle.make = make
+        edit_vehicle.model = model
+        edit_vehicle.year = year
+        edit_vehicle.odometer = odometer
+        edit_vehicle.vin = vin
+        edit_vehicle.put()
+
+        self.redirect('/fleet')
+
+
+
+class DeleteVehicle(Handler):
+    def post(self):
+        vehicle = int(self.request.get("delete"))
+        delete_vehicle = Vehicle.get_by_id(vehicle)
+
+        delete_vehicle.delete()
+
+        t = jinja_env.get_template("delete-confirm.html")
+        content = t.render(vehicle=delete_vehicle)
+        self.write(content)
+
+
+
 class ViewVehicle(Handler):
     def get(self, id):
 
@@ -173,6 +215,15 @@ class Maintenance(Handler):
             content = t.render(vehicles = None)
 
         self.write(content)
+
+    def post(self):
+        maint_vehicle = self.request.get("maint_vehicle")
+        vehicle = Vehicle.get_by_id(int(maint_vehicle))
+
+        vehicle.maintreq = False
+        vehicle.put()
+
+        self.redirect("/maintenance")
 
 class MaintNeeded(Handler):
     def get(self):
@@ -337,6 +388,41 @@ class Drivers(Handler):
             content = t.render(drivers = self.get_drivers())
             self.redirect('/drivers')
 
+class EditDriver(Handler):
+    def get(self):
+        driver = int(self.request.get("edit"))
+        edit_driver = Driver.get_by_id(driver)
+
+        t = jinja_env.get_template("driveredit.html")
+        content = t.render(driver=edit_driver)
+        self.write(content)
+
+    def post(self):
+        driver = int(self.request.get("driver"))
+        edit_driver = Driver.get_by_id(driver)
+        name = self.request.get("name")
+        employeeid = int(self.request.get("employeeid"))
+
+        edit_driver.name = name
+        edit_driver.employeeid = employeeid
+        edit_driver.put()
+
+        self.redirect('/drivers')
+
+
+
+class DeleteDriver(Handler):
+    def post(self):
+        driver = int(self.request.get("delete"))
+        delete_driver = Driver.get_by_id(driver)
+
+        delete_driver.delete()
+
+        t = jinja_env.get_template("delete-confirm.html")
+        content = t.render(driver=delete_driver)
+        self.write(content)
+
+
 class MaintRecords(Handler):
     def get(self):
         vehicles = self.get_vehicles()
@@ -344,6 +430,17 @@ class MaintRecords(Handler):
 
         t = jinja_env.get_template("records.html")
         response = t.render(records=records)
+        self.write(response)
+
+    def post(self):
+        vehicle_id = self.request.get("vehicle")
+        vehicle = Vehicle.get_by_id(int(vehicle_id))
+
+        vehicle.maintreq = True
+        vehicle.put()
+
+        t = jinja_env.get_template("request-confirmation.html")
+        response = t.render(vehicle=vehicle)
         self.write(response)
 
 class NewMaint(Handler):
@@ -362,6 +459,8 @@ class NewMaint(Handler):
 
         maint = MaintRecord(typeofmaint = chosen_type, description=description, vehicle=chosen_vehicle)
         maint.put()
+        chosen_vehicle.lastservic = datetime.today()
+        chosen_vehicle.put()
 
         self.redirect('/records')
 
@@ -487,6 +586,83 @@ class LogOut(Handler):
         self.logout_user()
         self.redirect('/')
 
+class Register(Handler):
+
+    def validate_username(self, username):
+        """ Returns the username string untouched if it is valid,
+            otherwise returns an empty string
+        """
+        USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+        if USER_RE.match(username):
+            return username
+        else:
+            return ""
+
+    def validate_password(self, password):
+        """ Returns the password string untouched if it is valid,
+            otherwise returns an empty string
+        """
+        PWD_RE = re.compile(r"^.{3,20}$")
+        if PWD_RE.match(password):
+            return password
+        else:
+            return ""
+
+    def validate_verify(self, password, verify):
+        """ Returns the password verification string untouched if it matches
+            the password, otherwise returns an empty string
+        """
+        if password == verify:
+            return verify
+
+    def get(self):
+        """ Display the registration page """
+        t = jinja_env.get_template("register.html")
+        content = t.render(errors={})
+        self.response.out.write(content)
+
+    def post(self):
+        """ User is trying to register """
+        submitted_username = self.request.get("username")
+        submitted_password = self.request.get("password")
+        submitted_verify = self.request.get("verify")
+
+        username = self.validate_username(submitted_username)
+        password = self.validate_password(submitted_password)
+        verify = self.validate_verify(submitted_password, submitted_verify)
+
+        errors = {}
+        existing_user = self.get_user_by_name(username)
+        has_error = False
+
+        if existing_user:
+            errors['username_error'] = "A user with that username already exists"
+            has_error = True
+        elif (username and password and verify):
+            # create new user object
+            pw_hash = hashutils.make_pw_hash(username, password)
+            user = User(username=username, password=pw_hash)
+            user.put()
+        else:
+            has_error = True
+
+            if not username:
+                errors['username_error'] = "That's not a valid username"
+
+            if not password:
+                errors['password_error'] = "That's not a valid password"
+
+            if not verify:
+                errors['verify_error'] = "Passwords don't match"
+
+        if has_error:
+            t = jinja_env.get_template("register.html")
+            content = t.render(username=username, errors=errors)
+            self.response.out.write(content)
+        else:
+            self.redirect('/')
+            return
+
 
 app = webapp2.WSGIApplication([
     ('/', Index),
@@ -498,8 +674,27 @@ app = webapp2.WSGIApplication([
     ('/drivers', Drivers),
     ('/records', MaintRecords),
     ('/newmaint', NewMaint),
-    webapp2.Route('/vehicle/<id:\d+>', ViewVehicle),
+    ('/driveredit', EditDriver),
+    ('/driverdelete', DeleteDriver),
+    ('/vehicleedit', EditVehicle),
+    ('/vehicledelete', DeleteVehicle),
     ('/login', Login),
     ('/logout', LogOut),
+    ('/register', Register),
     #('/test', Test)
 ], debug=True)
+
+auth_paths = [
+    '/fleet'
+    '/maintenance'
+    '/inspection'
+    '/inspect'
+    '/maintneeded'
+    '/drivers'
+    '/records'
+    '/newmaint'
+    '/driveredit'
+    '/driverdelete'
+    '/vehicleedit'
+    '/vehicledelete'
+]

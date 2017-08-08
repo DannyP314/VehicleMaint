@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  {% if driver %}
+    <strong>{{driver.name}}</strong> has been removed.
+  {% else %}
+    <strong>{{vehicle.year}} {{vehicle.model}}</strong> has been removed.
+  {% endif %}
+{% endblock %}

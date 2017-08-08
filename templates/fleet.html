@@ -1,33 +1,61 @@
 {% extends "base.html" %}
 
 {% block content %}
-<ul>
+<table class="table table-hover">
 {% for vehicle in vehicles %}
-  <li>({{vehicle.unit}}){{vehicle.year}} {{vehicle.make}}</li>
+  <tr>
+      <td>({{vehicle.unit}}){{vehicle.year}} {{vehicle.make}}</td>
+      <td>
+          <form action="/records" method="post">
+            <input type="hidden" name="vehicle" value="{{vehicle.key().id()}}" />
+            <input type="submit" value="Request Maintenance" />
+          </form>
+      </td>
+      <td>
+        <form action="/vehicleedit" method="get">
+          <input type="hidden" name="edit" value="{{vehicle.key().id()}}" />
+            <input type="submit" value="Edit Vehicle" />
+        </form>
+      </td>
+      <td>
+        <form action="/vehicledelete" method="post">
+          <input type="hidden" name="delete" value="{{vehicle.key().id()}}" />
+          <input type="submit" value="Delete Vehicle" />
+        </form>
+    </td>
+  </tr>
 {% endfor %}
-</ul>
+</table>
 {% if errors %}
 <span class="error">{{errors.unit_error}}{{errors.vin_error}}, {{errors.make_error}}, {{errors.model_error}}, {{errors.year_error}}</span>
 {% endif %}
 <br />Add a Vehicle:
 <form action="/fleet" method="post">
+  <div class="form-group">
     <label>
         Make:
         <input type="text" name="new-vehicle-make" value="{{make}}"/>
         Model:
         <input type="text" name="new-vehicle-model" value="{{model}}"/><br>
+    </label>
+    <label>
         Year:
         <input type="text" name="new-vehicle-year" value="{{year}}"/>
         Odometer:
         <input type="text" name="new-vehicle-odometer" value="{{odometer}}"/><br />
+    </label>
+    <label>
         VIN:
         <input type="text" name="new-vehicle-vin" value="{{vin}}"/>
         Unit Number:
         <input type="number" name="new-vehicle-unit" min="1" max="20" />
         Date of Last Service:
         <input type="date" name="new-vehicle-service" value="{{service}}"/><br />
+    </label>
+    <label>
         <input type="submit" />
     </label>
+  </div>
 </form>
 
 {% endblock %}

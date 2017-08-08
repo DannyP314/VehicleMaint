@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="/vehicleedit" method="post">
+  <div class="form-group">
+    <label>
+        Make:
+        <input type="text" name="make" value="{{vehicle.make}}"/>
+        Model:
+        <input type="text" name="model" value="{{vehicle.model}}"/><br>
+    </label>
+    <label>
+        Year:
+        <input type="text" name="year" value="{{vehicle.year}}"/>
+        Odometer:
+        <input type="text" name="odometer" value="{{vehicle.odometer}}"/><br />
+    </label>
+    <label>
+        VIN:
+        <input type="text" name="vin" value="{{vehicle.vin}}"/>
+    </label>
+    <label>
+        <input type="hidden" name="vehicle" value="{{vehicle.key().id()}}" />
+        <input type="submit" />
+    </label>
+  </div>
+</form>
+{% endblock %}

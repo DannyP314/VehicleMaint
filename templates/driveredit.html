@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<form action="/driveredit" method="post">
+    <label>Driver Name:</label>
+    <input type="text" name="name" value="{{ driver.name }}"/><br />
+    <label>Employee ID:</label>
+    <input type="text" name="employeeid" value="{{ driver.employeeid }}"/><br />
+    <input type="hidden" name="driver" value="{{ driver.key().id() }}" />
+    <input type="submit" />
+</form>
+
+{% endblock %}
