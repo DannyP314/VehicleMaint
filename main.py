@@ -82,6 +82,37 @@ class Handler(webapp2.RequestHandler):
         forms = query.run()
         return forms
 
+    def login_user(self, user):
+        """ Login a user specified by a User object user """
+        user_id = user.key().id()
+        self.set_secure_cookie('user_id', str(user_id))
+
+    def logout_user(self):
+        """ Logout a user specified by a User object user """
+        self.set_secure_cookie('user_id', '')
+
+    def read_secure_cookie(self, name):
+        cookie_val = self.request.cookies.get(name)
+        if cookie_val:
+            return hashutils.check_secure_val(cookie_val)
+
+    def set_secure_cookie(self, name, val):
+        cookie_val = hashutils.make_secure_val(val)
+        self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (name, cookie_val))
+
+    def initialize(self, *a, **kw):
+        """
+            A filter to restrict access to certain pages when not logged in.
+            If the request path is in the global auth_paths list, then the user
+            must be signed in to access the path/resource.
+        """
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        uid = self.read_secure_cookie('user_id')
+        self.user = uid and User.get_by_id(int(uid))
+
+        if not self.user and self.request.path in auth_paths:
+            self.redirect('/')
+
 
 class Index(Handler):
     def get(self):
@@ -588,10 +619,8 @@ class LogOut(Handler):
 
 class Register(Handler):
 
+
     def validate_username(self, username):
-        """ Returns the username string untouched if it is valid,
-            otherwise returns an empty string
-        """
         USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
         if USER_RE.match(username):
             return username
@@ -599,9 +628,6 @@ class Register(Handler):
             return ""
 
     def validate_password(self, password):
-        """ Returns the password string untouched if it is valid,
-            otherwise returns an empty string
-        """
         PWD_RE = re.compile(r"^.{3,20}$")
         if PWD_RE.match(password):
             return password
@@ -609,20 +635,24 @@ class Register(Handler):
             return ""
 
     def validate_verify(self, password, verify):
-        """ Returns the password verification string untouched if it matches
-            the password, otherwise returns an empty string
-        """
         if password == verify:
             return verify
 
     def get(self):
-        """ Display the registration page """
-        t = jinja_env.get_template("register.html")
-        content = t.render(errors={})
-        self.response.out.write(content)
+        t = jinja_env.get_template("signup.html")
+        response = t.render(errors={})
+        self.response.out.write(response)
 
     def post(self):
-        """ User is trying to register """
+        """
+            Validate submitted data, creating a new user if all fields are valid.
+            If data doesn't validate, render the form again with an error.
+
+            This code is essentially identical to the solution to the Signup portion
+            of the Formation assignment. The main modification is that we are now
+            able to create a new user object and store it when we have valid data.
+        """
+
         submitted_username = self.request.get("username")
         submitted_password = self.request.get("password")
         submitted_verify = self.request.get("verify")
@@ -639,10 +669,14 @@ class Register(Handler):
             errors['username_error'] = "A user with that username already exists"
             has_error = True
         elif (username and password and verify):
-            # create new user object
+
+            # create new user object and store it in the database
             pw_hash = hashutils.make_pw_hash(username, password)
-            user = User(username=username, password=pw_hash)
+            user = User(username=username, pw_hash=pw_hash)
             user.put()
+
+            # login our new user
+            self.login_user(user)
         else:
             has_error = True
 
@@ -655,14 +689,13 @@ class Register(Handler):
             if not verify:
                 errors['verify_error'] = "Passwords don't match"
 
-        if has_error:
-            t = jinja_env.get_template("register.html")
-            content = t.render(username=username, errors=errors)
-            self.response.out.write(content)
-        else:
-            self.redirect('/')
-            return
 
+        if has_error:
+            t = jinja_env.get_template("signup.html")
+            response = t.render(username=username, email=email, errors=errors)
+            self.response.out.write(response)
+        else:
+            self.redirect('/fleet')
 
 app = webapp2.WSGIApplication([
     ('/', Index),
@@ -685,16 +718,16 @@ app = webapp2.WSGIApplication([
 ], debug=True)
 
 auth_paths = [
-    '/fleet'
-    '/maintenance'
-    '/inspection'
-    '/inspect'
-    '/maintneeded'
-    '/drivers'
-    '/records'
-    '/newmaint'
-    '/driveredit'
-    '/driverdelete'
-    '/vehicleedit'
+    '/fleet',
+    '/maintenance',
+    '/inspection',
+    '/inspect',
+    '/maintneeded',
+    '/drivers',
+    '/records',
+    '/newmaint',
+    '/driveredit',
+    '/driverdelete',
+    '/vehicleedit',
     '/vehicledelete'
 ]
